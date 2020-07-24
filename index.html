@@ -185,22 +185,30 @@
   </script>
   <script>
     var cities = [
-      {Municipio: "Barão de Cocais", latitude: -19.945444644421883, longitude: -43.48569608250261},
-      {Municipio: "Belo Vale", latitude: -20.407900031859626, longitude: -44.02436251584152},
-      {Municipio: "Brumadinho", latitude: -20.14391940397509, longitude: -44.1997145092036},
-      {Municipio: "Catas Altas", latitude: -20.074467607494753, longitude: -43.4074839807526},
-      {Municipio: "Congonhas", latitude: -20.50200554138617, longitude: -43.857123508227545},
+      {Municipio: "Barão de Cocais",latitude: -19.909278771977498, longitude: -43.49920348780185, zoom: 10},
+      // {Municipio: "Barão de Cocais", latitude: -19.945444644421883, longitude: -43.48569608250261},
+      {Municipio: "Belo Vale", latitude: -20.42942926398318, longitude: -43.934257814277686, zoom: 12},
+      // {Municipio: "Belo Vale", latitude: -20.407900031859626, longitude: -44.02436251584152},
+      {Municipio: "Brumadinho", latitude: -20.142983434381307, longitude: -44.13974102263418, zoom: 12},
+      // {Municipio: "Brumadinho", latitude: -20.14391940397509, longitude: -44.1997145092036},
+      {Municipio: "Catas Altas", latitude: -20.077152185641708, longitude: -43.3992657210832, zoom: 12},
+      {Municipio: "Congonhas", latitude: -20.430103380674637, longitude: -43.9129391153468 },
+      // {Municipio: "Congonhas", latitude: -20.50200554138617, longitude: -43.857123508227545},
       {Municipio: "Itabira", latitude: -19.620073113496076, longitude: -43.22637787455898},
-      {Municipio: "Itabirito", latitude: -20.251994913911673, longitude: -43.80338972089936},
-      {Municipio: "Mariana", latitude: -20.378775346357145, longitude: -43.41575741694413},
-      {Municipio: "Nova Lima", latitude: -19.98627556363408, longitude: -43.8473661059015},
-      {Municipio: "Ouro Preto", latitude: -20.387137553517732, longitude: -43.50447355894073},
-      {Municipio: "Rio Acima", latitude: -20.087865459097472, longitude: -43.78981123098882},
-      {Municipio: "Rio Piracicaba", latitude: -19.928905488396992, longitude: -43.173885317437055},
-      {Municipio: "Sabará", latitude: -19.892318156364226, longitude: -43.81031312366949},
-      {Municipio: "Santa Bárbara", latitude: -19.960851553363938, longitude: -43.41566411560521},
-      {Municipio: "Santa Maria de Itabira", latitude: -19.448852679280037, longitude: -43.116828454946045},
-      {Municipio: "São Gonçalo do Rio Abaixo", latitude: -19.824367703238295, longitude: -43.360483671045614}
+      {Municipio: "Itabirito", latitude: -20.221283137050875, longitude: -43.88365799850749, zoom: 12},
+      // {Municipio: "Itabirito", latitude: -20.251994913911673, longitude: -43.80338972089936},
+      {Municipio: "Mariana", latitude: -20.177485221539854, longitude: -43.49042314829839},
+      // {Municipio: "Mariana", latitude: -20.378775346357145, longitude: -43.41575741694413},
+      {Municipio: "Nova Lima", latitude: -20.07993684894025, longitude: -43.89981212601779, zoom: 10.5},
+      // {Municipio: "Nova Lima", latitude: -19.975812559158967, longitude: -43.86254461905315, zoom: 12},
+      {Municipio: "Ouro Preto", latitude: -20.391168769242213, longitude: -43.66470421734721, zoom: 9},
+      // {Municipio: "Ouro Preto", latitude: -20.387137553517732, longitude: -43.50447355894073, zoom: 9},
+      {Municipio: "Rio Acima", latitude: -20.087865459097472, longitude: -43.78981123098882, zoom: 10},
+      {Municipio: "Rio Piracicaba", latitude: -19.928905488396992, longitude: -43.173885317437055, zoom: 12},
+      {Municipio: "Sabará", latitude: -19.862656307174106, longitude: -43.80877090829941, zoom: 12},
+      {Municipio: "Santa Bárbara", latitude: -19.96061714184657, longitude: -43.23900218301452, zoom: 12},
+      {Municipio: "Santa Maria de Itabira", latitude: -19.448852679280037, longitude: -43.116828454946045, zoom: 10},
+      {Municipio: "São Gonçalo do Rio Abaixo", latitude: -19.86119285395948, longitude: -43.37296139498824, zoom: 12}
     ]
     window.addEventListener('load', function() {
       const citiesList = document.querySelector('#cities-list');
@@ -212,7 +220,7 @@
         listItem.addEventListener('click', function() {
           citiesList.classList.toggle('closed');
           map.flyTo({
-            zoom: 11,
+            zoom: city.zoom || 11,
             center: [city.longitude, city.latitude],
             essential: true
           });
