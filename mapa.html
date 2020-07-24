@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>ZAS - Minas Gerais</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    #cities-list{
+      position: absolute;
+      right: 10px;
+      bottom: 15px;
+      background-color: #865023;
+      color: white;
+      font-family: sans-serif;
+      padding: 10px 10px 0;
+      z-index: 10;
+    }
+
+    #cities-list h3{
+      margin: 0;
+      margin-bottom: 10px;
+    }
+
+    #cities-list ul{
+      margin: 0;
+      overflow: hidden;
+      transition: 0.4s;
+      height: 360px;
+      padding: 0;
+    }
+
+    #cities-list.closed ul {
+      height: 0;
+    }
+
+    #cities-list ul li{
+      list-style: none;
+      font-size: 15px;
+      margin: 5px 0;
+      cursor: pointer;
+    }
+    
+    #cities-list ul li:hover{
+      color: #eec232;
+    }
+
+    .toggle::after{
+      width: 15px;
+      height: 15px;
+      display: inline-block;
+      position: relative;
+      top: 2px;
+      content: "";
+      background-size:contain;
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgNDA5LjYgNDA5LjYiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQwOS42IDQwOS42OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiPjxnPjxnPgoJPGc+CgkJPHBhdGggZD0iTTM5Mi41MzMsMTg3LjczM0gxNy4wNjdDNy42NDEsMTg3LjczMywwLDE5NS4zNzQsMCwyMDQuOHM3LjY0MSwxNy4wNjcsMTcuMDY3LDE3LjA2N2gzNzUuNDY3ICAgIGM5LjQyNiwwLDE3LjA2Ny03LjY0MSwxNy4wNjctMTcuMDY3UzQwMS45NTksMTg3LjczMywzOTIuNTMzLDE4Ny43MzN6IiBkYXRhLW9yaWdpbmFsPSIjMDAwMDAwIiBjbGFzcz0iYWN0aXZlLXBhdGgiIHN0eWxlPSJmaWxsOiNGRkZGRkYiIGRhdGEtb2xkX2NvbG9yPSIjMDAwMDAwIj48L3BhdGg+Cgk8L2c+CjwvZz48L2c+IDwvc3ZnPg==");
+      margin-left: 10px;
+    }
+    .closed .toggle::after{
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNTEyIDUxMjsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBjbGFzcz0iIj48ZyB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDAgMCkiPjxnPgoJPGc+CgkJPHBhdGggZD0iTTQ5MiwyMzZIMjc2VjIwYzAtMTEuMDQ2LTguOTU0LTIwLTIwLTIwYy0xMS4wNDYsMC0yMCw4Ljk1NC0yMCwyMHYyMTZIMjBjLTExLjA0NiwwLTIwLDguOTU0LTIwLDIwczguOTU0LDIwLDIwLDIwaDIxNiAgICB2MjE2YzAsMTEuMDQ2LDguOTU0LDIwLDIwLDIwczIwLTguOTU0LDIwLTIwVjI3NmgyMTZjMTEuMDQ2LDAsMjAtOC45NTQsMjAtMjBDNTEyLDI0NC45NTQsNTAzLjA0NiwyMzYsNDkyLDIzNnoiIGRhdGEtb3JpZ2luYWw9IiMwMDAwMDAiIGNsYXNzPSJhY3RpdmUtcGF0aCIgc3R5bGU9ImZpbGw6I0ZGRkZGRiIgZGF0YS1vbGRfY29sb3I9IiMwMDAwMDAiPjwvcGF0aD4KCTwvZz4KPC9nPjwvZz4gPC9zdmc+");
+
+    }
+
+    @media screen and (max-width: 792px){
+      #cities-list{
+        position: absolute;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <script
+    src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+  <link rel="stylesheet"
+    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css"
+    type="text/css" />
+  <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+  <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
+  <div id="map">
+  </div>
+  <div id="cities-list" class="closed">
+    <h3 class="toggle">Cidades Afetadas</h3>
+    <ul>
+    </ul>
+  </div>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiaHVnb25iZyIsImEiOiJjanFza2JmaTQwZDllNDNyeGtub3VsODZ0In0.eYH5xYQqrhVWaKIndItTOw';
+    var map = new mapboxgl.Map({
+      container: 'map', // container id
+      style: 'mapbox://styles/hugonbg/ckcccawwn145a1ipdhzsxkcca', //hosted style id
+      //style: 'mapbox://styles/hugonbg/ckcccawwn145a1ipdhzsxkcca/draft', //rascunho
+      center: [-43.650, -20], // starting position
+      zoom: 8.85, // starting zoom
+      attributionControl: false
+    });
+
+    map.addControl(
+      new mapboxgl.AttributionControl({
+        
+        customAttribution:
+          '<a href="https://www.linkedin.com/in/hugonbg/">Mapa: Hugo Nicolau Barbosa de Gusmão</a>'
+      })
+    );
+
+    map.addControl(
+      new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        countries: 'br',
+        mapboxgl,
+        bbox: [-48.7690742032396,-22.3736756008592,-41.112944186973664,-15.168266382530078],
+        filter: function(item) {
+          // returns true if item contains New South Wales region
+          return item.context
+          .map(function(i) {
+          // id is in the form {index}.{id} per https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
+          // this example attempts to find the `region` named `New South Wales`
+          console.log(i)
+          return (
+            i.text === 'Minas Gerais'
+            );
+          })
+          .reduce(function(acc, cur) {
+          return acc || cur;
+          });
+          },
+      })
+    );
+
+    //Muda o icone
+    map.on('mouseenter', 'local-das-barragens', function() {
+      map.getCanvas().style.cursor = 'pointer'
+    })
+    map.on('mouseleave', 'local-das-barragens', function() {
+      map.getCanvas().style.cursor = ''
+    })
+    //Popups
+
+    map.on('click', function (e) {
+      var features = map.queryRenderedFeatures(e.point, {
+        layers: ['local-das-barragens'] // replace this with the name of the layer
+      });
+      console.log({
+        latitude: e.lngLat.lat,
+        longitude: e.lngLat.lng
+      });
+
+      if (!features.length) {
+        return;
+      }
+      var feature = features[0];
+      var popup = new mapboxgl.Popup({ offset: [0, -15] })
+        .setLngLat(feature.geometry.coordinates)
+        .setMaxWidth('none')
+        .setHTML('<p><b>Barragem: </b>' + feature.properties.Barragem_nome +
+          '<br><b>Mina: </b>' + feature.properties.Mina +
+          '<br><b>Município: </b>' + feature.properties.Municipio +
+          '<br><b>Altura Atual(m): </b>' + feature.properties.Altura_Atual +
+          '<br><b>Volume Atual(m³): </b>' + feature.properties.Volume_Atual +
+          '<br><b>Método Construtivo: </b><br>' + feature.properties.Metodo_Construtivo +
+          '<br><b>Categoria de Risco: </b>' + feature.properties.Categoria_de_Risco +
+          '<br><b>Dano Potencial Associado: </b>' + feature.properties.Dano_Potencial_Associado +
+          '<br><b>Classe: </b>' + feature.properties.Classe +
+          '<br><b>Nível de Emergência: </b>' + feature.properties.Nivel_de_Emergencia +
+          '<br style="font-size:85%"><b>Fronte:</b><br>Agência Nacional de Mineração - 06/2020')
+        .addTo(map);
+    });
+  </script>
+  <script>
+    var cities = [
+      {Municipio: "Barão de Cocais", latitude: -19.945444644421883, longitude: -43.48569608250261},
+      {Municipio: "Belo Vale", latitude: -20.407900031859626, longitude: -44.02436251584152},
+      {Municipio: "Brumadinho", latitude: -20.14391940397509, longitude: -44.1997145092036},
+      {Municipio: "Catas Altas", latitude: -20.074467607494753, longitude: -43.4074839807526},
+      {Municipio: "Congonhas", latitude: -20.50200554138617, longitude: -43.857123508227545},
+      {Municipio: "Itabira", latitude: -19.620073113496076, longitude: -43.22637787455898},
+      {Municipio: "Itabirito", latitude: -20.251994913911673, longitude: -43.80338972089936},
+      {Municipio: "Mariana", latitude: -20.378775346357145, longitude: -43.41575741694413},
+      {Municipio: "Nova Lima", latitude: -19.98627556363408, longitude: -43.8473661059015},
+      {Municipio: "Ouro Preto", latitude: -20.387137553517732, longitude: -43.50447355894073},
+      {Municipio: "Rio Acima", latitude: -20.087865459097472, longitude: -43.78981123098882},
+      {Municipio: "Rio Piracicaba", latitude: -19.928905488396992, longitude: -43.173885317437055},
+      {Municipio: "Sabará", latitude: -19.892318156364226, longitude: -43.81031312366949},
+      {Municipio: "Santa Bárbara", latitude: -19.960851553363938, longitude: -43.41566411560521},
+      {Municipio: "Santa Maria de Itabira", latitude: -19.448852679280037, longitude: -43.116828454946045},
+      {Municipio: "São Gonçalo do Rio Abaixo", latitude: -19.824367703238295, longitude: -43.360483671045614}
+    ]
+    window.addEventListener('load', function() {
+      const citiesList = document.querySelector('#cities-list');
+      for( let city of cities ){
+        let listItem = document.createElement('li');
+        listItem.textContent = city.Municipio;
+        citiesList.querySelector('ul').appendChild(listItem);
+
+        listItem.addEventListener('click', function() {
+          citiesList.classList.toggle('closed');
+          map.flyTo({
+            zoom: 11,
+            center: [city.longitude, city.latitude],
+            essential: true
+          });
+        })
+      }
+
+      citiesList.querySelector('h3').addEventListener('click', (e) => {
+        citiesList.classList.toggle('closed');
+      })
+    })
+  </script>
+
+
+</body>
+
+</html>
